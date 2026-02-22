@@ -1,0 +1,31 @@
+🌱 Excited to share my latest project: Food Share - A Food Waste Reduction Platform! 🌱
+
+I'm thrilled to announce the completion of my food waste reduction application, designed to connect people with excess food to those who need it. This project aims to tackle food waste, a critical global issue where nearly 1/3 of all food produced is wasted.
+
+🔹 Project Overview:
+Food Share is a full-stack web application that helps reduce food waste by creating a platform where users can share or donate excess food items with their local community.
+
+🔹 Key Features:
+✅ User Authentication with Firebase
+✅ Real-time messaging system between users
+✅ Food listing management with image uploads
+✅ Responsive design for all devices
+✅ Profile management system
+✅ Wishlist/saved items functionality
+
+🔹 Technologies Used:
+• Next.js with TypeScript
+• Firebase (Authentication, Firestore)
+• Tailwind CSS
+• Framer Motion for smooth animations
+• Cloudinary for image management
+
+This project reflects my dedication to creating technology solutions that address real-world problems while demonstrating my technical skills in modern web development.
+
+🔗 Website Link - https://food-waste-reduction-eta.vercel.app/
+
+🔗 GitHub Repository: https://github.com/Rohitsengar02/food-waste-reduction
+
+I'm open to feedback and would love to connect with others passionate about reducing food waste or interested in similar projects!
+
+#WebDevelopment #NextJS #Firebase #FoodWasteReduction #SustainableTech #ReactJS #FullStack #TypeScript

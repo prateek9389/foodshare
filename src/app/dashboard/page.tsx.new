@@ -1,0 +1,202 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { FiShoppingBag, FiDollarSign, FiUsers, FiBarChart2, FiTrendingUp, FiArrowLeft, FiPackage, FiClock, FiHeart, FiAlertTriangle, FiUser, FiCheck, FiCalendar } from 'react-icons/fi';
+import { useAuth } from '../../context/AuthContext';
+import { db } from '../../firebase';
+import { collection, query, where, getDocs, doc, getDoc, orderBy, limit } from 'firebase/firestore';
+import Navbar from '../../components/Navbar';
+
+interface Listing {
+  id: string;
+  title: string;
+  price: number;
+  imageUrl: string;
+  createdAt: Date;
+  isAvailable: boolean;
+  viewCount: number;
+  likeCount: number;
+  soldCount?: number;
+}
+
+interface Order {
+  id: string;
+  productId: string;
+  productTitle: string;
+  amount: number;
+  buyerName: string;
+  buyerPhoto?: string;
+  orderDate: any;
+  status: 'pending' | 'completed' | 'cancelled';
+}
+
+const DashboardPage = () => {
+  const { user, isAuthenticated } = useAuth();
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [accountType, setAccountType] = useState<'individual' | 'business' | 'ngo' | undefined>(undefined);
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [topSellingProducts, setTopSellingProducts] = useState<Listing[]>([]);
+  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
+  
+  // Sample analytics data (in a real app, would be calculated from actual data)
+  const [viewsData, setViewsData] = useState({
+    daily: [25, 40, 30, 35, 55, 42, 48],  // Last 7 days
+    weekly: [120, 145, 165, 180]  // Last 4 weeks
+  });
+  
+  const [stats, setStats] = useState({
+    totalListings: 0,
+    activeListings: 0,
+    totalViews: 0,
+    totalLikes: 0,
+    totalRevenue: 0,
+    averagePrice: 0,
+    peopleImpacted: 0,
+    recentSoldItems: 0,
+    totalOrders: 0
+  });
+
+  // Format currency for display
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+    
+    fetchUserData();
+  }, [isAuthenticated, user, router]);
+
+  const fetchUserData = async () => {
+    if (!user?.uid) return;
+    
+    try {
+      setLoading(true);
+      
+      // Fetch user profile to get account type
+      const userDocRef = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        setAccountType(userData.accountType || 'individual');
+        
+        // Fetch user listings
+        const listingsQuery = query(
+          collection(db, 'listings'),
+          where('userId', '==', user.uid)
+        );
+        
+        const listingsSnapshot = await getDocs(listingsQuery);
+        const listingsData: Listing[] = [];
+        
+        let totalViews = 0;
+        let totalLikes = 0;
+        let totalRevenue = 0;
+        let activeCount = 0;
+        let recentSoldCount = 0;
+        let totalOrders = 0;
+        
+        listingsSnapshot.forEach((doc) => {
+          const data = doc.data() as any;
+          const listing: Listing = {
+            id: doc.id,
+            title: data.title,
+            price: data.price,
+            imageUrl: data.images && data.images.length > 0 ? data.images[0] : '',
+            createdAt: data.createdAt ? new Date(data.createdAt.seconds * 1000) : new Date(),
+            isAvailable: data.isAvailable !== false,
+            viewCount: data.viewCount || 0,
+            likeCount: data.likeCount || 0,
+            soldCount: data.soldCount || Math.floor(Math.random() * 10) // Mock data for demo
+          };
+          
+          listingsData.push(listing);
+          
+          // Calculate stats
+          totalViews += listing.viewCount;
+          totalLikes += listing.likeCount;
+          totalRevenue += listing.price;
+          
+          if (listing.isAvailable) {
+            activeCount++;
+          } else {
+            // Consider items sold in the last month
+            const oneMonthAgo = new Date();
+            oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+            
+            if (listing.createdAt > oneMonthAgo) {
+              recentSoldCount++;
+            }
+          }
+        });
+        
+        setListings(listingsData);
+        
+        // Get top selling products by sorting listings by sold count
+        const topProducts = [...listingsData]
+          .sort((a, b) => (b.soldCount || 0) - (a.soldCount || 0))
+          .slice(0, 5);
+        setTopSellingProducts(topProducts);
+        
+        // Fetch orders (mock data for now - in real app would fetch from orders collection)
+        const mockOrders: Order[] = [
+          {
+            id: '1',
+            productId: listingsData[0]?.id || 'prod1',
+            productTitle: listingsData[0]?.title || 'Vegetable Bundle',
+            amount: listingsData[0]?.price || 250,
+            buyerName: 'Rahul Sharma',
+            orderDate: { seconds: Date.now() / 1000 - 86400 }, // yesterday
+            status: 'completed'
+          },
+          {
+            id: '2',
+            productId: listingsData[1]?.id || 'prod2',
+            productTitle: listingsData[1]?.title || 'Fresh Fruits Basket',
+            amount: listingsData[1]?.price || 350,
+            buyerName: 'Priya Patel',
+            orderDate: { seconds: Date.now() / 1000 - 172800 }, // 2 days ago
+            status: 'completed'
+          },
+          {
+            id: '3',
+            productId: listingsData[2]?.id || 'prod3',
+            productTitle: listingsData[2]?.title || 'Rice Package',
+            amount: listingsData[2]?.price || 500,
+            buyerName: 'Amit Kumar',
+            orderDate: { seconds: Date.now() / 1000 - 43200 }, // 12 hours ago
+            status: 'pending'
+          }
+        ];
+        
+        setRecentOrders(mockOrders);
+        totalOrders = mockOrders.length;
+        
+        setStats({
+          totalListings: listingsData.length,
+          activeListings: activeCount,
+          totalViews: totalViews,
+          totalLikes: totalLikes,
+          totalRevenue: totalRevenue,
+          averagePrice: listingsData.length > 0 ? totalRevenue / listingsData.length : 0,
+          peopleImpacted: userData.accountType === 'ngo' ? (userData.ngoInfo?.reachCount || 0) : 0,
+          recentSoldItems: recentSoldCount,
+          totalOrders: totalOrders
+        });
+      }
+    } catch (err) {
+      console.error('Error fetching user data:', err);
+      setError('Failed to load dashboard data. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };

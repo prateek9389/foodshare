@@ -1,0 +1,98 @@
+/* Confetti Animation Styles */
+.confetti-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.confetti {
+  position: absolute;
+  top: -10px;
+  border-radius: 0;
+  animation: confetti-fall linear forwards, confetti-shake ease-in-out infinite alternate;
+}
+
+@keyframes confetti-fall {
+  0% {
+    top: -10%;
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    transform: translateY(0) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes confetti-shake {
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(15px);
+  }
+  50% {
+    transform: translateX(-15px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+  100% {
+    transform: translateX(-5px);
+  }
+}
+
+/* Custom color classes for confetti (to prevent Tailwind purge) */
+.bg-green-300, .bg-green-400, .bg-green-500, .bg-green-600,
+.bg-blue-300, .bg-blue-400, .bg-blue-500, .bg-blue-600,
+.bg-yellow-300, .bg-yellow-400, .bg-yellow-500, .bg-yellow-600,
+.bg-red-300, .bg-red-400, .bg-red-500, .bg-red-600,
+.bg-purple-300, .bg-purple-400, .bg-purple-500, .bg-purple-600,
+.bg-pink-300, .bg-pink-400, .bg-pink-500, .bg-pink-600 {
+  /* Applying a real property to prevent empty ruleset warning */
+  display: block;
+}
+
+/* Animations for the thank you card elements */
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.scale-in {
+  animation: scaleIn 0.5s ease-out forwards;
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+.delay-5 { animation-delay: 0.5s; }
+.delay-6 { animation-delay: 0.6s; }
